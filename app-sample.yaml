@@ -8,5 +8,18 @@ runtime: python
 api_version: 1
 
 handlers:
+
+# static home page
+- url: /
+  static_files: static/index.html
+  upload: static/index\.html
+  expiration: "90d"
+
+# favicon
+- url: /favicon\.ico
+  static_files: static/favicon.ico
+  upload: static/favicon\.ico
+  expiration: "90d"
+
 - url: .*
   script: main.py
