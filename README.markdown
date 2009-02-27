@@ -22,15 +22,15 @@ You need [Google App Engine SDK](http://code.google.com/intl/fr/appengine/downlo
 * And read [documentation](http://code.google.com/intl/fr/appengine/docs/)
 
 * Clone this repository
-* copy `app_engine/app-sample.yaml` to `app_engine/app.yaml`
+* copy `app-sample.yaml` to `app_engine/app.yaml`
   * edit `app_engine/app.yaml` and change application id
-* copy `app_engine/config-sample.yaml` to `app_engine/config.yaml`
+* copy `config-sample.yaml` to `app_engine/config.yaml`
   * edit `app_engine/config.yaml` (see Configuration)
 
 Configuration
 -------------
 
-see `app_engine/config-sample.yaml`
+see content in `app_engine/config-sample.yaml`
 
 _Need some documentation_
 
