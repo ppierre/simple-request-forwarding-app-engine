@@ -1,5 +1,5 @@
-# file : config.yaml
-# Copy this file to config.yaml 
+# file : app_engine/config.yaml
+# Copy this file to app_engine/config.yaml 
 # and configure your forwarding
 
 - url: /a_long_secret_url

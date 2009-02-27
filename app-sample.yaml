@@ -1,5 +1,5 @@
-# file : app.yaml
-# Copy this file to app.yaml 
+# file : app_engine/app.yaml
+# Copy this file to app_engine/app.yaml 
 # and change application id
 
 application: put-your-app-id-here
