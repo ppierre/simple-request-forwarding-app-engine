@@ -155,17 +155,6 @@ class LocalMainHandler(MainHandler):
     MainHandler.do_request(self, request_url, request_method)
 
 
-# ==============================
-# = Main page display (no URL) =
-# ==============================
-
-class MainPage(webapp.RequestHandler):
-
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/plain'
-    self.response.out.write('Simple forwarding of (some) incoming request')
-
-
 # ======================
 # = Launch application =
 # ======================
@@ -174,14 +163,14 @@ def main():
   
   # Test if in SDK (local) or is deployed (google)
   if HOST == 'local':
-    # use LocalMainHandler to relod config.yaml at each request
-    application = webapp.WSGIApplication([('/', MainPage),
-                                          (r'(/.*)', LocalMainHandler),],
-                                         debug=True)
+    Handler = LocalMainHandler
+    debug = True
   elif HOST == 'google':
-    application = webapp.WSGIApplication([('/', MainPage),
-                                          (r'(/.*)', MainHandler),],
-                                         debug=False)
+    Handler = MainHandler
+    debug = False
+  
+  # launch Handler
+  application = webapp.WSGIApplication([(r'(/.*)', Handler)], debug=debug)
   run_wsgi_app(application)
 
 
