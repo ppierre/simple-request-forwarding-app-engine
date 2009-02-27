@@ -1,0 +1,12 @@
+# file : app.yaml
+# Copy this file to app.yaml 
+# and change application id
+
+application: put-your-app-id-here
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: .*
+  script: main.py

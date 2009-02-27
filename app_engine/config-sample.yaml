@@ -1,0 +1,33 @@
+# file : config.yaml
+# Copy this file to config.yaml 
+# and configure your forwarding
+
+- url: /a_long_secret_url
+  methods: [POST]
+  forwards:
+    - url: http://www.some.tld/hooks
+      method: POST
+      remove:
+        - bar
+        - foo
+    - url: http://www.some.other.tld/to_get
+      method: GET
+      only:
+        - payload
+        - foo
+      default:
+        payload: "empty content"
+      set:
+        bar: test
+- url: /ryEtNrt68EShsZr68th
+  # methods: [GET, POST]
+  forwards:
+    - url: http://www.some.other.tld/private/hooks.php
+      method: POST
+      user: aUser
+      pass: Pa55w0d
+      only:
+        - payload
+      set:
+        ftpuser: anOtherUser
+        ftppass: Pownnn
