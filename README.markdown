@@ -26,6 +26,8 @@ You need [Google App Engine SDK](http://code.google.com/intl/fr/appengine/downlo
   * edit `app_engine/app.yaml` and change application id
 * copy `config-sample.yaml` to `app_engine/config.yaml`
   * edit `app_engine/config.yaml` (see Configuration)
+* copy `config-test-local.yaml` to `app_engine/config-test-local.yaml`
+  * edit `app_engine/config-test-local.yaml` (see Configuration)
 
 Configuration
 -------------
@@ -33,6 +35,12 @@ Configuration
 see content in `app_engine/config-sample.yaml`
 
 _Need some documentation_
+
+`app_engine/config-test-local.yaml` is for local testing (with SDK).
+It will be merged with `app_engine/config.yaml` .
+
+URL re-defined in `app_engine/config-test-local.yaml` will take over `app_engine/config.yaml` .
+It won't be used on deployed application.
 
 Usage
 -----

@@ -1,0 +1,36 @@
+# file : config-test-local.yaml
+# Copy this file to config-test-local.yaml
+# config-test-local.yaml is for local testing (with SDK)
+# It will be merged with config.yaml
+# URL re-defined here will take over app_engine/config.yaml
+# It won't be used on deployed application
+
+- url: /a_long_secret_url
+  methods: [POST]
+  forwards:
+    - url: http://127.0.0.1:8888/hooks
+      method: POST
+      remove:
+        - bar
+        - foo
+    - url: http://127.0.0.1:8888/to_get
+      method: GET
+      only:
+        - payload
+        - foo
+      default:
+        payload: "empty content"
+      set:
+        bar: test
+- url: /ryEtNrt68EShsZr68th
+  # methods: [GET, POST]
+  forwards:
+    - url: http://127.0.0.1:8888/private/hooks.php
+      method: POST
+      user: aUser
+      pass: Pa55w0d
+      only:
+        - payload
+      set:
+        ftpuser: anOtherUser
+        ftppass: Pownnn

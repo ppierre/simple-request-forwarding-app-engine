@@ -30,13 +30,19 @@ else:
 # ====================
 
 def getConfig():
-  config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
+  config_dict = getConfigForFile('config.yaml')
+  # merge test configuration when in SDK (local)
+  if HOST == 'local':
+    config_dict.update(getConfigForFile('config-test-local.yaml'))
+  return config_dict
+
+def getConfigForFile(config_file):
+  config_path = os.path.join(os.path.dirname(__file__), config_file)
   config_list = yaml.load(file(config_path))
   config_dict = {}
   # organise configuration by requested url
   for item in config_list:
     config_dict[item['url']] = item
-    logging.info(config_dict)
   return config_dict
 
 # Global variable for configuration parameters
