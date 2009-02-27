@@ -38,7 +38,7 @@ def getConfig():
 
 def getConfigForFile(config_file):
   config_path = os.path.join(os.path.dirname(__file__), config_file)
-  config_list = yaml.load(file(config_path))
+  config_list = yaml.safe_load(file(config_path))
   config_dict = {}
   # organise configuration by requested url
   for item in config_list:
