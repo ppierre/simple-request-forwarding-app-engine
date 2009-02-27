@@ -18,6 +18,7 @@ Installation
 ------------
 
 You need [Google App Engine SDK](http://code.google.com/intl/fr/appengine/downloads.html)
+
 * And read [documentation](http://code.google.com/intl/fr/appengine/docs/)
 
 * Clone this repository
