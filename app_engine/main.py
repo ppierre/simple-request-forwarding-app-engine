@@ -157,6 +157,7 @@ class LocalMainHandler(MainHandler):
   
   def do_request(self, request_url, request_method):
     # reload config at each request in SDK environement
+    global CONFIG
     CONFIG = getConfig()
     MainHandler.do_request(self, request_url, request_method)
 
