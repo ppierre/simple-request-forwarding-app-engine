@@ -37,4 +37,4 @@ skip_files:
 - ^(.*/)?.*/RCS/.*
 - ^(.*/)?\..*
 # remove config-test-local.yaml from upload
-- ^(.*/)?config-test-local\.yaml
+# - ^(.*/)?config-test-local\.yaml
