@@ -6,11 +6,13 @@ import base64
 import wsgiref.handlers
 import yaml
 import os
+import sys
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
+from utils.Chainmap import Chainmap
 
 # ==============================================
 # = Check local SDK or production environement =
@@ -49,6 +51,14 @@ def getConfigForFile(config_file):
 global CONFIG
 CONFIG = getConfig()
 
+# ========================
+# = Config default value =
+# ========================
+
+# Use config-default.yaml as template to fill option with default value
+CONFIG_DEFAULT = getConfigForFile('config-default.yaml')['::dummy::']
+logging.info(CONFIG_DEFAULT)
+
 # ==========================================
 # = MainHandler : match url against CONFIG =
 # ==========================================
@@ -58,13 +68,20 @@ class MainHandler(webapp.RequestHandler):
   # Handel all request methods
   def do_request(self, request_url, request_method):
     
-    # lookup config for url and validate request method
+    # lookup config for url
     config_request = CONFIG.get(request_url)
     if not(config_request):
       # TODO: error message page not found
       self.response.set_status(403)
       return # exit : no config for this URL
-    if request_method not in config_request.get('methods',['GET', 'POST']):
+    
+    # Set defaults values
+    logging.info(sys.path)
+    config_request = Chainmap(config_request,CONFIG_DEFAULT)
+    
+    #validate request method
+    logging.info(config_request['methods'])
+    if request_method not in config_request['methods']:
       # TODO: error message 405
       self.response.set_status(405)
       return # exit : not allowed request methode
@@ -79,21 +96,25 @@ class MainHandler(webapp.RequestHandler):
     
     # Make all forwarding
     for config in config_request['forwards']:
-    
+      
+      # Set default value
+      config = Chainmap(config,CONFIG_DEFAULT['forwards'][0])
+      logging.info(CONFIG_DEFAULT['forwards'][0])
+      
       # get and filter param
-      param = config.get('default',{})
-      keys = set(self.request.arguments()) - set(config.get('remove',[]))
-      if ('only' in config):
-        keys = keys & set(config.get('only',[]))
+      param = config['default']
+      keys = set(self.request.arguments()) - set(config['remove'])
+      if 'only' in config:
+        keys = keys & set(config['only'])
       for key in keys:
         # TODO Request::get(key) / Request::get_all(key) ?
         param[key] = self.request.get(key)
-      param.update(config.get('set',{}))
+      param.update(config['set'])
     
       # build forwarded request
       url = config['url']
       payload = urllib.urlencode(param)
-      method = config.get('method', urlfetch.GET)
+      method = config['method']
     
       # handle payload (POST,PUT) or query parameters
       if method in ['POST', 'PUT']:

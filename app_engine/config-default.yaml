@@ -1,0 +1,18 @@
+# file : app_engine/config-default.yaml
+#
+# !!!!! DO NOT EDIT HIS FILE !!!!!!
+# Or you know what you do...
+#
+# provide default value for config.yaml
+
+- url: "::dummy::"
+  methods: [GET, POST]
+  forwards:
+    - # url: "must be set !"
+      method: POST
+      # user: "null" # do not set if not needed
+      # pass: "null" # do not set if not needed
+      remove: []
+      # only: [] # do not set if not needed
+      default: {}
+      set: {}
