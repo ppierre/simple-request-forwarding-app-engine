@@ -80,7 +80,12 @@ class WSGIAppHandler(object):
     """Called by WSGI when a request comes in."""
     self.request = webapp.Request(environ)
     self.response = webapp.Response()
-    self.do_request(self.request.path, environ['REQUEST_METHOD'])
+    
+    try:
+      self.do_request(self.request.path, environ['REQUEST_METHOD'])
+    except Exception, e:
+      self.handle_exception(e, self.__debug)
+    
     self.response.wsgi_write(start_response)
     return ['']
     
