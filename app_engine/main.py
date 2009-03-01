@@ -82,7 +82,7 @@ class WSGIAppHandler(object):
     self.response = webapp.Response()
     
     try:
-      self.do_request(self.request.path, environ['REQUEST_METHOD'])
+      self.do_request()
     except Exception, e:
       self.handle_exception(e, self.__debug)
     
@@ -90,7 +90,10 @@ class WSGIAppHandler(object):
     return ['']
     
   # Handel all request methods
-  def do_request(self, request_url, request_method):
+  def do_request(self):
+    
+    request_url = self.request.path
+    request_method = self.request.method
     
     # lookup config for url
     config_request = self.__config.get(request_url)
