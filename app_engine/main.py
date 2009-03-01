@@ -83,6 +83,9 @@ class WSGIAppHandler(object):
     self.request = webapp.Request(environ)
     self.response = webapp.Response()
     
+    # put request config option in request Ad-Hoc Attributes
+    self.request.config = self.__config
+    
     try:
       self.do_request()
     except Exception, e:
@@ -97,13 +100,13 @@ class WSGIAppHandler(object):
     request_url = self.request.path
     request_method = self.request.method
     
-    if request_url not in self.__config:
+    if request_url not in self.request.config:
       # TODO: error message page not found
       self.response.set_status(403)
       return # exit : no config for this URL
     
     # lookup config for url
-    config_request = self.__config.get(request_url)
+    config_request = self.request.config[request_url]
     
     #validate request method
     logging.info(config_request['methods'])
