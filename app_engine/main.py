@@ -59,12 +59,45 @@ CONFIG = getConfig()
 CONFIG_DEFAULT = getConfigForFile('config-default.yaml')['::dummy::']
 logging.info(CONFIG_DEFAULT)
 
-# ==========================================
-# = MainHandler : match url against CONFIG =
-# ==========================================
 
-class MainHandler(webapp.RequestHandler):
+# ==================
+# = WSGIAppHandler =
+# ==================
+
+class WSGIAppHandler(object):
+  """Run directly as a WSGI-compatible application.
   
+  Take a list of yaml file name for configuration option
+  """
+  
+  def __init__(self, yaml_list, debug=False):
+    """Initializes with option from yaml files
+    
+    Args:
+      yaml_list: list of configuration file first taking over last one
+      debug: if true send stack trace to browser 
+             and reload configuration a each request
+    """
+    self.__debug = debug
+    self.__yaml_list = yaml_list
+    self._init_config()
+    
+  def _init_config(self):
+    """Load configuration from list of yaml files"""
+    
+    # FIXME: Refactoring, move global CONFIG to instance variables
+    global CONFIG
+    CONFIG = getConfig()
+    
+  
+  def __call__(self, environ, start_response):
+    """Called by WSGI when a request comes in."""
+    self.request = webapp.Request(environ)
+    self.response = webapp.Response()
+    self.do_request(self.request.path, environ['REQUEST_METHOD'])
+    self.response.wsgi_write(start_response)
+    return ['']
+    
   # Handel all request methods
   def do_request(self, request_url, request_method):
     
@@ -155,52 +188,52 @@ class MainHandler(webapp.RequestHandler):
     # Send reponse to original request
     self.response.set_status(response_code)
     self.response.out.write(response_txt)
-  
-  # Redirect all resquest to the same handler
-  # TODO: Maybe a way to take request before HTTP method dispatching
-  
-  def get(self, request_url):
-    self.do_request(request_url, 'GET')
-  
-  def post(self, request_url):
-    self.do_request(request_url, 'POST')
-  
-  def put(self, request_url):
-    self.do_request(request_url, 'PUT')
-  
-  def delete(self, request_url):
-    self.do_request(request_url, 'DELETE')
 
-# Sub-Class of MainHandler, reload CONFIG at each request
-# Used in local (SDK) environement
+# =======================
+# = WSGIAppHandlerDebug =
+# =======================
 
-class LocalMainHandler(MainHandler):
+class WSGIAppHandlerDebug(WSGIAppHandler):
+  """Used when running in SDK for reloading config at each request"""
   
-  def do_request(self, request_url, request_method):
-    # reload config at each request in SDK environement
-    global CONFIG
-    CONFIG = getConfig()
-    MainHandler.do_request(self, request_url, request_method)
-
-
+  def __call__(self, environ, start_response):
+    """Called by WSGI when a request comes in.
+    Will reload config and call parent
+    """
+    self._init_config()
+    WSGIAppHandler.__call__(self, environ, start_response)
+  
 # ======================
 # = Launch application =
 # ======================
 
-def main():
+# main WSGI application (WSGIAppHandler)
+global application
+
+def setup():
+  """build and cache in global 'application' main WSGI application"""
   
-  # Test if in SDK (local) or is deployed (google)
+  global application
+  
+  config_yaml = 'config.yaml'
+  config_local_yaml = 'config-test-local.yaml'
+  
+  # Test if in SDK (local)
   if HOST == 'local':
-    Handler = LocalMainHandler
-    debug = True
-  elif HOST == 'google':
-    Handler = MainHandler
-    debug = False
+    application = \
+      WSGIAppHandlerDebug([config_local_yaml, config_yaml], debug=True)
+  else:
+    application = WSGIAppHandler([config_yaml])
   
-  # launch Handler
-  application = webapp.WSGIApplication([(r'(/.*)', Handler)], debug=debug)
+def main():
+  """launch main WSGI application"""
+  
+  global application
   run_wsgi_app(application)
 
 
 if __name__ == '__main__':
+  # buiild and cache
+  setup()
+  # launch
   main()
