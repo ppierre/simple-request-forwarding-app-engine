@@ -25,10 +25,10 @@ from utils import server
 class WSGIAppHandler(object):
   """Run directly as a WSGI-compatible application.
   
-  Take a list of yaml file name for configuration option
+  Take a config object for configuration option
   """
   
-  def __init__(self, yaml_list, yaml_default, debug=False):
+  def __init__(self, config, debug=False):
     """Initializes with option from yaml files
     
     Args:
@@ -37,8 +37,7 @@ class WSGIAppHandler(object):
              and reload configuration a each request
     """
     self.__debug = debug
-    basedir = os.path.dirname(__file__)
-    self.__config = YamlOptions(yaml_list, yaml_default, basedir)
+    self.__config = config
     
   def _init_config(self):
     """Load configuration from list of yaml files"""
@@ -193,16 +192,20 @@ def setup():
   
   config_yaml = 'config.yaml'
   config_local_yaml = 'config-test-local.yaml'
+  yaml_default = 'config-default.yaml'
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug([config_local_yaml, config_yaml],
-                                      'config-default.yaml',
-                                      debug=True)
+    yaml_list = [config_local_yaml, config_yaml]
+    debug = True
   else:
-    application = WSGIAppHandler([config_yaml],
-                                 'config-default.yaml')
+    yaml_list = [config_yaml]
+    debug = False
   
+  basedir = os.path.dirname(__file__)
+  config = YamlOptions(yaml_list, yaml_default, basedir)
+  application = WSGIAppHandlerDebug(config, debug=debug)
+
 def main():
   """launch main WSGI application"""
   
