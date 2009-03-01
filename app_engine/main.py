@@ -37,12 +37,7 @@ class WSGIAppHandler(object):
              and reload configuration a each request
     """
     self.__debug = debug
-    self.__config = config
-    
-  def _init_config(self):
-    """Load configuration from list of yaml files"""
-    
-    self.__config.reload()
+    self._config = config
     
   
   def __call__(self, environ, start_response):
@@ -51,7 +46,7 @@ class WSGIAppHandler(object):
     self.response = webapp.Response()
     
     # put request config option in request Ad-Hoc Attributes
-    self.request.config = self.__config
+    self.request.config = self._config
     
     try:
       self.do_request()
@@ -175,7 +170,7 @@ class WSGIAppHandlerDebug(WSGIAppHandler):
     """Called by WSGI when a request comes in.
     Will reload config and call parent
     """
-    self._init_config()
+    self._config.reload()
     WSGIAppHandler.__call__(self, environ, start_response)
   
 # ======================
