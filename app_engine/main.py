@@ -19,7 +19,15 @@ from utils import server
 # = Load config file =
 # ====================
 
-def getConfigForFile(config_file):
+def get_config_from(config_file):
+  """Read yaml file relative to script path
+  
+  Args:
+    config_file: filename of yaml file
+  
+  Returns:
+    a dict of config item indexed by URL
+  """
   config_path = os.path.join(os.path.dirname(__file__), config_file)
   config_list = yaml.safe_load(file(config_path))
   config_dict = {}
@@ -34,7 +42,7 @@ def getConfigForFile(config_file):
 # ========================
 
 # Use config-default.yaml as template to fill option with default value
-CONFIG_DEFAULT = getConfigForFile('config-default.yaml')['::dummy::']
+CONFIG_DEFAULT = get_config_from('config-default.yaml')['::dummy::']
 logging.info(CONFIG_DEFAULT)
 
 
@@ -65,7 +73,7 @@ class WSGIAppHandler(object):
     
     self.__config = {}
     for config_file in reversed(self.__yaml_list):
-      self.__config.update(getConfigForFile(config_file))
+      self.__config.update(get_config_from(config_file))
     
   
   def __call__(self, environ, start_response):
