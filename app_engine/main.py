@@ -4,7 +4,6 @@ import logging
 import urllib
 import base64
 import wsgiref.handlers
-import yaml
 import os
 import sys
 import cgi
@@ -15,28 +14,8 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from utils.Chainmap import Chainmap
+from utils.yamloptions import YamlOptions
 from utils import server
-
-# ====================
-# = Load config file =
-# ====================
-
-def get_config_from(config_file):
-  """Read yaml file relative to script path
-  
-  Args:
-    config_file: filename of yaml file
-  
-  Returns:
-    a dict of config item indexed by URL
-  """
-  config_path = os.path.join(os.path.dirname(__file__), config_file)
-  config_list = yaml.safe_load(file(config_path))
-  config_dict = {}
-  # organise configuration by requested url
-  for item in config_list:
-    config_dict[item['url']] = item
-  return config_dict
 
 
 # ==================
@@ -58,24 +37,13 @@ class WSGIAppHandler(object):
              and reload configuration a each request
     """
     self.__debug = debug
-    self.__yaml_list = yaml_list
-    self.__yaml_default = yaml_default
-    self._init_config()
+    basedir = os.path.dirname(__file__)
+    self.__config = YamlOptions(yaml_list, yaml_default, basedir)
     
   def _init_config(self):
     """Load configuration from list of yaml files"""
     
-    self.__config = {}
-    for config_file in reversed(self.__yaml_list):
-      self.__config.update(get_config_from(config_file))
-    
-    # default value for each key (URL)
-    config_default = get_config_from(self.__yaml_default)['::dummy::']
-    config_forward_default = config_default['forwards'][0]
-    for (url_request,config_request) in self.__config.items():
-      config_request['forwards'] = [Chainmap(config_forward,config_forward_default)
-                                    for config_forward in config_request['forwards']]
-      self.__config[url_request] = Chainmap(config_request,config_default)
+    self.__config.reload()
     
   
   def __call__(self, environ, start_response):
