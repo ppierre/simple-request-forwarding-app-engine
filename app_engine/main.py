@@ -29,10 +29,10 @@ class WSGIAppHandler(object):
   """
   
   def __init__(self, config, debug=False):
-    """Initializes with option from yaml files
+    """Initializes with option from yaml files loaded in a YamlOptions object
     
     Args:
-      yaml_list: list of configuration file first taking over last one
+      config: YamlOptions instance
       debug: if true send stack trace to browser 
              and reload configuration a each request
     """
