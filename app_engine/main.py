@@ -118,7 +118,6 @@ class WSGIAppHandler(object):
     # TODO add HTTP basic authentification for incoming request
     
     # variable to collect response
-    response_txt = ''
     response_code = 200
     
     # Make all forwarding
@@ -169,19 +168,19 @@ class WSGIAppHandler(object):
       # TODO better message formating (or more usefull)
       if status_code == 200:
         # HTTP OK result :)
-        response_txt += "Send at %s\n" % url
+        self.response.out.write("Send at %s\n" % url)
       else:
         # HTTP Error code :(
-        response_txt += "Houps: %d for %s\n" % (status_code,url)
+        self.response.out.write("Houps: %d for %s\n" % (status_code, url))
         # forward (last) error code to sender
         response_code = status_code
-        logging.error(response_txt)
+        # TODO: factor login with response
+        # logging.error(response_txt)
     
     # End of all forwarding
     
     # Send reponse to original request
     self.response.set_status(response_code)
-    self.response.out.write(response_txt)
 
 # =======================
 # = WSGIAppHandlerDebug =
