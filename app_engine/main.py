@@ -39,15 +39,6 @@ def get_config_from(config_file):
   return config_dict
 
 
-# ========================
-# = Config default value =
-# ========================
-
-# Use config-default.yaml as template to fill option with default value
-CONFIG_DEFAULT = get_config_from('config-default.yaml')['::dummy::']
-logging.info(CONFIG_DEFAULT)
-
-
 # ==================
 # = WSGIAppHandler =
 # ==================
@@ -58,7 +49,7 @@ class WSGIAppHandler(object):
   Take a list of yaml file name for configuration option
   """
   
-  def __init__(self, yaml_list, debug=False):
+  def __init__(self, yaml_list, yaml_default, debug=False):
     """Initializes with option from yaml files
     
     Args:
@@ -68,6 +59,7 @@ class WSGIAppHandler(object):
     """
     self.__debug = debug
     self.__yaml_list = yaml_list
+    self.__yaml_default = yaml_default
     self._init_config()
     
   def _init_config(self):
@@ -76,6 +68,14 @@ class WSGIAppHandler(object):
     self.__config = {}
     for config_file in reversed(self.__yaml_list):
       self.__config.update(get_config_from(config_file))
+    
+    # default value for each key (URL)
+    config_default = get_config_from(self.__yaml_default)['::dummy::']
+    config_forward_default = config_default['forwards'][0]
+    for (url_request,config_request) in self.__config.items():
+      config_request['forwards'] = [Chainmap(config_forward,config_forward_default)
+                                    for config_forward in config_request['forwards']]
+      self.__config[url_request] = Chainmap(config_request,config_default)
     
   
   def __call__(self, environ, start_response):
@@ -97,16 +97,13 @@ class WSGIAppHandler(object):
     request_url = self.request.path
     request_method = self.request.method
     
-    # lookup config for url
-    config_request = self.__config.get(request_url)
-    if not(config_request):
+    if request_url not in self.__config:
       # TODO: error message page not found
       self.response.set_status(403)
       return # exit : no config for this URL
     
-    # Set defaults values
-    logging.info(sys.path)
-    config_request = Chainmap(config_request,CONFIG_DEFAULT)
+    # lookup config for url
+    config_request = self.__config.get(request_url)
     
     #validate request method
     logging.info(config_request['methods'])
@@ -124,10 +121,6 @@ class WSGIAppHandler(object):
     
     # Make all forwarding
     for config in config_request['forwards']:
-      
-      # Set default value
-      config = Chainmap(config,CONFIG_DEFAULT['forwards'][0])
-      logging.info(CONFIG_DEFAULT['forwards'][0])
       
       # get and filter param
       param = config['default']
@@ -232,10 +225,12 @@ def setup():
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = \
-      WSGIAppHandlerDebug([config_local_yaml, config_yaml], debug=True)
+    application = WSGIAppHandlerDebug([config_local_yaml, config_yaml],
+                                      'config-default.yaml',
+                                      debug=True)
   else:
-    application = WSGIAppHandler([config_yaml])
+    application = WSGIAppHandler([config_yaml],
+                                 'config-default.yaml')
   
 def main():
   """launch main WSGI application"""
