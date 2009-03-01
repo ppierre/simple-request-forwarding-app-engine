@@ -13,19 +13,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from utils.Chainmap import Chainmap
-
-# ==============================================
-# = Check local SDK or production environement =
-# ==============================================
-
-if os.environ.get('SERVER_SOFTWARE','').startswith('Devel'):
-    HOST='local'
-    logging.info('SDK environement, will reload config.yaml at each request')
-elif os.environ.get('SERVER_SOFTWARE','').startswith('Goog'):
-    HOST='google'
-else:
-    logging.error('Unknown server. Production/development?')
-
+from utils import server
 
 # ====================
 # = Load config file =
@@ -209,7 +197,7 @@ def setup():
   config_local_yaml = 'config-test-local.yaml'
   
   # Test if in SDK (local)
-  if HOST == 'local':
+  if server.platform() == 'local':
     application = \
       WSGIAppHandlerDebug([config_local_yaml, config_yaml], debug=True)
   else:
