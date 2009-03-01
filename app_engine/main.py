@@ -7,6 +7,8 @@ import wsgiref.handlers
 import yaml
 import os
 import sys
+import cgi
+import traceback
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import webapp
@@ -192,7 +194,7 @@ class WSGIAppHandler(object):
       exception: the exception that was thrown
       debug_mode: True if the web application is running in debug mode
     """
-    self.error(500)
+    self.response.set_status(500)
     logging.exception(exception)
     if debug_mode:
       lines = ''.join(traceback.format_exception(*sys.exc_info()))
