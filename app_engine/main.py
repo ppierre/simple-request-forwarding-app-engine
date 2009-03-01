@@ -28,15 +28,8 @@ else:
 
 
 # ====================
-# = Load config.yaml =
+# = Load config file =
 # ====================
-
-def getConfig():
-  config_dict = getConfigForFile('config.yaml')
-  # merge test configuration when in SDK (local)
-  if HOST == 'local':
-    config_dict.update(getConfigForFile('config-test-local.yaml'))
-  return config_dict
 
 def getConfigForFile(config_file):
   config_path = os.path.join(os.path.dirname(__file__), config_file)
@@ -47,9 +40,6 @@ def getConfigForFile(config_file):
     config_dict[item['url']] = item
   return config_dict
 
-# Global variable for configuration parameters
-global CONFIG
-CONFIG = getConfig()
 
 # ========================
 # = Config default value =
@@ -85,9 +75,9 @@ class WSGIAppHandler(object):
   def _init_config(self):
     """Load configuration from list of yaml files"""
     
-    # FIXME: Refactoring, move global CONFIG to instance variables
-    global CONFIG
-    CONFIG = getConfig()
+    self.__config = {}
+    for config_file in reversed(self.__yaml_list):
+      self.__config.update(getConfigForFile(config_file))
     
   
   def __call__(self, environ, start_response):
@@ -102,7 +92,7 @@ class WSGIAppHandler(object):
   def do_request(self, request_url, request_method):
     
     # lookup config for url
-    config_request = CONFIG.get(request_url)
+    config_request = self.__config.get(request_url)
     if not(config_request):
       # TODO: error message page not found
       self.response.set_status(403)
