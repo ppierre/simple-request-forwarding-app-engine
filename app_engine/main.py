@@ -9,8 +9,9 @@ import sys
 import cgi
 import traceback
 
+import webob
+
 from google.appengine.api import urlfetch
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from utils.Chainmap import Chainmap
@@ -42,9 +43,9 @@ class WSGIAppHandler(object):
   
   def __call__(self, environ, start_response):
     """Called by WSGI when a request comes in."""
-    self.request = webapp.Request(environ)
-    self.response = webapp.Response()
-    
+    self.request = webob.Request(environ)
+    self.response = webob.Response()
+        
     # put request config option in request Ad-Hoc Attributes
     self.request.config = self._config
     
@@ -53,8 +54,8 @@ class WSGIAppHandler(object):
     except Exception, e:
       self.handle_exception(e, self.__debug)
     
-    self.response.wsgi_write(start_response)
-    return ['']
+    logging.info(self.response.body)
+    return self.response(environ, start_response)
     
   # Handel all request methods
   def do_request(self):
@@ -64,7 +65,7 @@ class WSGIAppHandler(object):
     
     if request_url not in self.request.config:
       # TODO: error message page not found
-      self.response.set_status(403)
+      self.response.status = 403
       return # exit : no config for this URL
     
     # lookup config for url
@@ -74,7 +75,7 @@ class WSGIAppHandler(object):
     logging.info(config_request['methods'])
     if request_method not in config_request['methods']:
       # TODO: error message 405
-      self.response.set_status(405)
+      self.response.status = 405
       return # exit : not allowed request methode
     
     # TODO filter on Request::remote_addr
@@ -89,7 +90,7 @@ class WSGIAppHandler(object):
       
       # get and filter param
       param = config['default']
-      keys = set(self.request.arguments()) - set(config['remove'])
+      keys = set(self.request.params.keys()) - set(config['remove'])
       if 'only' in config:
         keys = keys & set(config['only'])
       for key in keys:
@@ -128,10 +129,10 @@ class WSGIAppHandler(object):
       # TODO better message formating (or more usefull)
       if status_code == 200:
         # HTTP OK result :)
-        self.response.out.write("Send at %s\n" % url)
+        self.response.body += "Send at %s\n" % url
       else:
         # HTTP Error code :(
-        self.response.out.write("Houps: %d for %s\n" % (status_code, url))
+        self.response.body  += "Houps: %d for %s\n" % (status_code, url)
         # forward (last) error code to sender
         response_code = status_code
         # TODO: factor login with response
@@ -140,7 +141,7 @@ class WSGIAppHandler(object):
     # End of all forwarding
     
     # Send reponse to original request
-    self.response.set_status(response_code)
+    self.response.status = response_code
   
   def handle_exception(self, exception, debug_mode):
     """Called if this handler throws an exception during execution.
@@ -152,12 +153,11 @@ class WSGIAppHandler(object):
       exception: the exception that was thrown
       debug_mode: True if the web application is running in debug mode
     """
-    self.response.set_status(500)
+    self.response.status = 500
     logging.exception(exception)
     if debug_mode:
       lines = ''.join(traceback.format_exception(*sys.exc_info()))
-      self.response.clear()
-      self.response.out.write('<pre>%s</pre>' % (cgi.escape(lines, quote=True)))
+      self.response.body = '<pre>%s</pre>' % (cgi.escape(lines, quote=True))
 
 # =======================
 # = WSGIAppHandlerDebug =
@@ -171,7 +171,7 @@ class WSGIAppHandlerDebug(WSGIAppHandler):
     Will reload config and call parent
     """
     self._config.reload()
-    WSGIAppHandler.__call__(self, environ, start_response)
+    return WSGIAppHandler.__call__(self, environ, start_response)
   
 # ======================
 # = Launch application =
@@ -183,23 +183,24 @@ global application
 def setup():
   """build and cache in global 'application' main WSGI application"""
   
-  global application
+  yaml_list = ['config.yaml']
+  if server.platform() == 'local': 
+    yaml_list.insert(0, 'config-test-local.yaml')
   
-  config_yaml = 'config.yaml'
-  config_local_yaml = 'config-test-local.yaml'
   yaml_default = 'config-default.yaml'
-  
-  # Test if in SDK (local)
-  if server.platform() == 'local':
-    yaml_list = [config_local_yaml, config_yaml]
-    debug = True
-  else:
-    yaml_list = [config_yaml]
-    debug = False
   
   basedir = os.path.dirname(__file__)
   config = YamlOptions(yaml_list, yaml_default, basedir)
-  application = WSGIAppHandlerDebug(config, debug=debug)
+  
+  global application
+  
+  # Test if in SDK (local)
+  if server.platform() == 'local':
+    application = WSGIAppHandlerDebug(config, debug=True)
+  else:
+    application = WSGIAppHandler(config)
+  
+  
 
 def main():
   """launch main WSGI application"""
