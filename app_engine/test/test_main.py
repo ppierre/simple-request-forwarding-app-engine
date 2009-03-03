@@ -13,6 +13,12 @@ class DummyYamlOptions(dict):
 
 class IndexTest(unittest.TestCase):
 
+  def mock_forward(self, status_code, **args):
+    """set expected values for urlforward mock"""
+    self.mock_fetch(KWARGS, **args)
+    self.mocker.result(status_code)
+    self.mocker.replay()
+  
   def setUp(self):
     config = DummyYamlOptions({
         "/request_url": {
@@ -30,20 +36,15 @@ class IndexTest(unittest.TestCase):
       })
     self.application = WSGIAppHandler(config)
     
-    mocker = Mocker()
-    mock_fetch = mocker.mock()
+    self.mocker = Mocker()
+    self.mock_fetch = self.mocker.mock()
     self.old_fetch = main.urlforward
     logging.info(self.old_fetch)
-    main.urlforward = mock_fetch
-    
-    # mock result fetch ok
-    mock_fetch(KWARGS, url=CONTAINS("http://example.com/a_hooks.php"))
-    mocker.result(200)
-    
-    mocker.replay()
+    main.urlforward = self.mock_fetch
   
   def test_ok_redirect(self):
     app = TestApp(self.application)
+    self.mock_forward(200, url=CONTAINS("http://example.com/a_hooks.php"))
     response = app.get('/request_url')
     self.assertEqual('200 OK', response.status)
     self.assertTrue('Send at http://example.com/a_hooks.php' in response)
