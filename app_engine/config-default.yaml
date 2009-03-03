@@ -10,8 +10,8 @@
   forwards:
     - # url: "must be set !"
       method: POST
-      # login: "null" # do not set if not needed
-      # password: "null" # do not set if not needed
+      login: null # do not set if not needed
+      password: null # do not set if not needed
       remove: []
       # only: [] # do not set if not needed
       default: {}

@@ -11,11 +11,11 @@ import traceback
 
 import webob
 
-from google.appengine.api import urlfetch
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from utils.Chainmap import Chainmap
 from utils.yamloptions import YamlOptions
+from utils.urlforward import urlforward
 from utils import server
 
 
@@ -95,42 +95,28 @@ class WSGIAppHandler(object):
         # TODO Request::get(key) / Request::get_all(key) ?
         param[key] = self.request.get(key)
       param.update(config['set'])
-    
-      # build forwarded request
-      url = config['url']
-      payload = urllib.urlencode(param)
-      method = config['method']
-    
-      # handle payload (POST,PUT) or query parameters
-      if method in ['POST', 'PUT']:
-        fetch_param = {
-          'url'     : url,
-          'payload' : payload,
-        }
-      else:
-        # TODO: A better way to build request param ?
-        fetch_param = {
-          'url'     : url + '?' + payload,
-        }
-      fetch_param['method'] = method
       
-      # add Basic HTTP authentification if needed
-      if 'login' in config and 'password' in config:
-        auth_string = 'Basic ' + \
-          base64.encodestring(config['login']+':'+config['password'])
-        fetch_param['headers'] = { 'Authorization' : auth_string }
-
-      # fetch forwarded request
-      result = urlfetch.fetch(**fetch_param)
-      status_code = result.status_code
+      # build forwarded request
+      fetch_opt = ["url", 
+                   "method", 
+                   "headers", 
+                   "follow_redirects", 
+                   "login", 
+                   "password"]
+      
+      fetch_param = dict(filter(lambda (k,v): k in fetch_opt, 
+                                config.items()))
+      
+      status_code = urlforward(param=param, **fetch_param)
       
       # TODO better message formating (or more usefull)
       if status_code == 200:
         # HTTP OK result :)
-        self.response.body += "Send at %s\n" % url
+        self.response.body += "Send at %s\n" % config["url"]
       else:
         # HTTP Error code :(
-        self.response.body  += "Houps: %d for %s\n" % (status_code, url)
+        self.response.body  += "Houps: %d for %s\n" % \
+                                  (status_code, config["url"])
         # forward (last) error code to sender
         response_code = status_code
         # TODO: factor login with response
