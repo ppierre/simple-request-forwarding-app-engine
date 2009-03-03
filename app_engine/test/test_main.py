@@ -33,6 +33,7 @@ class IndexTest(unittest.TestCase):
     
     mocker = Mocker()
     mock_fetch = mocker.mock()
+    self.old_fetch = google.appengine.api.urlfetch.fetch
     google.appengine.api.urlfetch.fetch = mock_fetch
     
     # mock result fetch ok
@@ -54,5 +55,7 @@ class IndexTest(unittest.TestCase):
     app = TestApp(self.application)
     response = app.get('/request_not_define_url', status="403", expect_errors=True)
     self.assertEqual('403 Forbidden', response.status)
-    
+  
+  def tearDown(self):
+    google.appengine.api.urlfetch.fetch = self.old_fetch
 
