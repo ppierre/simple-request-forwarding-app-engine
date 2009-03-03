@@ -70,6 +70,5 @@ class SimpleTest(TestHelper):
   def test_faill_redirect(self):
     """Check non forwarding of not configured URL"""
     self.mock_not_forward()
-    response = self.app.get('/request_not_define_url', 
-                            status="403", expect_errors=True)
+    response = self.app.get('/request_not_define_url', expect_errors=True)
     self.assertEqual('403 Forbidden', response.status)
