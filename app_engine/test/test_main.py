@@ -21,10 +21,10 @@ class IndexTest(unittest.TestCase):
           'methods': ["GET", "POST"],
           'forwards': [
             { 'url': "http://exemple.com/a_hooks.php",
-              'method': "POST",
+              'method': "GET",
               'remove': [],
               'default': {},
-              'set': {},
+              'set': {"truc":"Houps"},
             },
           ]
         }
@@ -40,7 +40,7 @@ class IndexTest(unittest.TestCase):
     result_fetch_ok = mocker.mock()
     result_fetch_ok.status_code
     mocker.result(200)
-    mock_fetch(KWARGS, url="http://exemple.com/a_hooks.php")
+    mock_fetch(KWARGS, url=CONTAINS("http://exemple.com/a_hooks.php"))
     mocker.result(result_fetch_ok)
     
     mocker.replay()
