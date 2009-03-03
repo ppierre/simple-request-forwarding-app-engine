@@ -34,7 +34,7 @@ class IndexTest(unittest.TestCase):
           ]
         }
       })
-    self.application = WSGIAppHandler(config)
+    self.app = TestApp(WSGIAppHandler(config))
     
     self.mocker = Mocker()
     self.mock_fetch = self.mocker.mock()
@@ -43,15 +43,14 @@ class IndexTest(unittest.TestCase):
     main.urlforward = self.mock_fetch
   
   def test_ok_redirect(self):
-    app = TestApp(self.application)
     self.mock_forward(200, url=CONTAINS("http://example.com/a_hooks.php"))
-    response = app.get('/request_url')
+    response = self.app.get('/request_url')
     self.assertEqual('200 OK', response.status)
     self.assertTrue('Send at http://example.com/a_hooks.php' in response)
   
   def test_faill_redirect(self):
-    app = TestApp(self.application)
-    response = app.get('/request_not_define_url', status="403", expect_errors=True)
+    response = self.app.get('/request_not_define_url', 
+                            status="403", expect_errors=True)
     self.assertEqual('403 Forbidden', response.status)
   
   def tearDown(self):
