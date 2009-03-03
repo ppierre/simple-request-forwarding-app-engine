@@ -91,9 +91,10 @@ class WSGIAppHandler(object):
       keys = set(self.request.params.keys()) - set(config['remove'])
       if 'only' in config:
         keys = keys & set(config['only'])
+      logging.info("keys : %s" % keys)
       for key in keys:
         # TODO Request::get(key) / Request::get_all(key) ?
-        param[key] = self.request.get(key)
+        param[key] = self.request.params.get(key)
       param.update(config['set'])
       
       # build forwarded request
@@ -104,8 +105,7 @@ class WSGIAppHandler(object):
                    "login", 
                    "password"]
       
-      fetch_param = dict(filter(lambda (k,v): k in fetch_opt, 
-                                config.items()))
+      fetch_param = dict([(k,config[k]) for k in fetch_opt if k in config])
       
       status_code = urlforward(param=param, **fetch_param)
       
