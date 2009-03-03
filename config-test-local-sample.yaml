@@ -27,10 +27,10 @@
   forwards:
     - url: http://127.0.0.1:8888/private/hooks.php
       method: POST
-      user: aUser
-      pass: Pa55w0d
+      login: aUser
+      password: Pa55w0d
       only:
         - payload
       set:
-        ftpuser: anOtherUser
-        ftppass: Pownnn
+        ftplogin: anOtherUser
+        ftppassword: Pownnn

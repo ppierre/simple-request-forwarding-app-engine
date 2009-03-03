@@ -115,9 +115,9 @@ class WSGIAppHandler(object):
       fetch_param['method'] = method
       
       # add Basic HTTP authentification if needed
-      if 'user' in config and 'pass' in config:
+      if 'login' in config and 'password' in config:
         auth_string = 'Basic ' + \
-          base64.encodestring(config['user']+':'+config['pass'])
+          base64.encodestring(config['login']+':'+config['password'])
         fetch_param['headers'] = { 'Authorization' : auth_string }
 
       # fetch forwarded request
