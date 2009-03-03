@@ -19,7 +19,7 @@ class IndexTest(unittest.TestCase):
           'url': "/request_url",
           'methods': ["GET", "POST"],
           'forwards': [
-            { 'url': "http://exemple.com/a_hooks.php",
+            { 'url': "http://example.com/a_hooks.php",
               'method': "GET",
               'remove': [],
               'default': {},
@@ -37,7 +37,7 @@ class IndexTest(unittest.TestCase):
     main.urlforward = mock_fetch
     
     # mock result fetch ok
-    mock_fetch(KWARGS, url=CONTAINS("http://exemple.com/a_hooks.php"))
+    mock_fetch(KWARGS, url=CONTAINS("http://example.com/a_hooks.php"))
     mocker.result(200)
     
     mocker.replay()
@@ -46,7 +46,7 @@ class IndexTest(unittest.TestCase):
     app = TestApp(self.application)
     response = app.get('/request_url')
     self.assertEqual('200 OK', response.status)
-    self.assertTrue('Send at http://exemple.com/a_hooks.php' in response)
+    self.assertTrue('Send at http://example.com/a_hooks.php' in response)
   
   def test_faill_redirect(self):
     app = TestApp(self.application)
