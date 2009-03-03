@@ -12,6 +12,10 @@ class DummyYamlOptions(dict):
     pass
 
 class TestHelper(unittest.TestCase):
+  """Setup a test application and mock forwarded request
+  
+  Subclass must provide config property
+  """
 
   def mock_forward(self, status_code, **args):
     """set expected values for urlforward mock"""
@@ -39,6 +43,7 @@ class TestHelper(unittest.TestCase):
 
 
 class SimpleTest(TestHelper):
+  """Basic test"""
 
   config = DummyYamlOptions({
       "/request_url": {
@@ -56,12 +61,14 @@ class SimpleTest(TestHelper):
     })
   
   def test_ok_redirect(self):
+    """Check forwarding of request"""
     self.mock_forward(200, url=CONTAINS("http://example.com/a_hooks.php"))
     response = self.app.get('/request_url')
     self.assertEqual('200 OK', response.status)
     self.assertTrue('Send at http://example.com/a_hooks.php' in response)
   
   def test_faill_redirect(self):
+    """Check non forwarding of not configured URL"""
     self.mock_not_forward()
     response = self.app.get('/request_not_define_url', 
                             status="403", expect_errors=True)
