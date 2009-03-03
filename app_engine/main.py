@@ -54,7 +54,6 @@ class WSGIAppHandler(object):
     except Exception, e:
       self.handle_exception(e, self.__debug)
     
-    logging.info(self.response.body)
     return self.response(environ, start_response)
     
   # Handel all request methods
@@ -72,7 +71,6 @@ class WSGIAppHandler(object):
     config_request = self.request.config[request_url]
     
     #validate request method
-    logging.info(config_request['methods'])
     if request_method not in config_request['methods']:
       # TODO: error message 405
       self.response.status = 405
