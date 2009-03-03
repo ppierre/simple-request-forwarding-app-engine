@@ -1,11 +1,10 @@
 import unittest
 import logging
 
-import utils.urlforward
-
 from utils.webtest import TestApp
 from utils.mocker import *
 
+import main
 from main import WSGIAppHandler
 
 class DummyYamlOptions(dict):
@@ -33,8 +32,9 @@ class IndexTest(unittest.TestCase):
     
     mocker = Mocker()
     mock_fetch = mocker.mock()
-    self.old_fetch = utils.urlforward.urlforward
-    utils.urlforward.urlforward = mock_fetch
+    self.old_fetch = main.urlforward
+    logging.info(self.old_fetch)
+    main.urlforward = mock_fetch
     
     # mock result fetch ok
     mock_fetch(KWARGS, url=CONTAINS("http://exemple.com/a_hooks.php"))
@@ -54,5 +54,5 @@ class IndexTest(unittest.TestCase):
     self.assertEqual('403 Forbidden', response.status)
   
   def tearDown(self):
-    utils.urlforward.urlforward = self.old_fetch
+    main.urlforward = self.old_fetch
 
