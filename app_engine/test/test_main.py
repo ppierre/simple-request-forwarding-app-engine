@@ -19,6 +19,12 @@ class IndexTest(unittest.TestCase):
     self.mocker.result(status_code)
     self.mocker.replay()
   
+  def mock_not_forward(self):
+    """disallow use of urlforward"""
+    self.mock_fetch(KWARGS)
+    self.mocker.throw("unhallowed call of urlforward")
+    self.mocker.replay()
+  
   def setUp(self):
     config = DummyYamlOptions({
         "/request_url": {
@@ -49,6 +55,7 @@ class IndexTest(unittest.TestCase):
     self.assertTrue('Send at http://example.com/a_hooks.php' in response)
   
   def test_faill_redirect(self):
+    self.mock_not_forward()
     response = self.app.get('/request_not_define_url', 
                             status="403", expect_errors=True)
     self.assertEqual('403 Forbidden', response.status)
