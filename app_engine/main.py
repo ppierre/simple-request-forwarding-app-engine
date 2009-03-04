@@ -29,7 +29,7 @@ class WSGIAppHandler(object):
   Take a config object for configuration option
   """
   
-  def __init__(self, config, debug=False):
+  def __init__(self, config={}, debug=False):
     """Initializes with option from yaml files loaded in a YamlOptions object
     
     Args:
@@ -47,7 +47,11 @@ class WSGIAppHandler(object):
     self.response = webob.Response()
         
     # put request config option in request Ad-Hoc Attributes
-    self.request.config = self._config
+    if self._config:
+      self.request.config = self._config
+    else:
+      # TODO: error hanling (no request.config)
+      pass
     
     try:
       self.do_request()
@@ -161,7 +165,8 @@ class WSGIAppHandlerDebug(WSGIAppHandler):
     """Called by WSGI when a request comes in.
     Will reload config and call parent
     """
-    self._config.reload()
+    if self._config:
+      self._config.reload()
     return WSGIAppHandler.__call__(self, environ, start_response)
   
 # ======================
@@ -187,9 +192,9 @@ def setup():
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug(config, debug=True)
+    application = WSGIAppHandlerDebug(config=config, debug=True)
   else:
-    application = WSGIAppHandler(config)
+    application = WSGIAppHandler(config=config)
   
   
 

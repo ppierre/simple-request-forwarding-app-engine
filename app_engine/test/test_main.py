@@ -29,7 +29,7 @@ class TestHelper(unittest.TestCase):
     self.mocker.replay()
   
   def setUp(self):
-    self.app = TestApp(WSGIAppHandler(self.get_config()))
+    self.app = TestApp(WSGIAppHandler(config=self.get_config(), debug=True))
     
     self.mocker = Mocker()
     self.mock_fetch = self.mocker.mock()
