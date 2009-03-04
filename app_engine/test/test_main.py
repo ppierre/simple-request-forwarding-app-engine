@@ -77,7 +77,7 @@ class TestMixin:
     self.mock_a_hooks(200, param=fwd)
     self.assert_a_hooks_get_ok(params=req)
   
-  def get_config_mixin(self, mixin):
+  def get_forwards_mix(self, mixin):
     config = TestMixin.config_mixin.copy()
     config["/request_url"]["forwards"][0].update(mixin)
     return config
@@ -133,7 +133,7 @@ class SimpleTestPOST(TestHelper, SimpleTestMixin):
   """Basic test HTTP method POST"""
   
   def get_config(self):
-    return self.get_config_mixin({'method': 'POST'})
+    return self.get_forwards_mix({'method': 'POST'})
   
   def test_forward_http_method_post(self):
     """Check use of HTTP POST method"""
@@ -145,7 +145,7 @@ class SimpleTestGET(TestHelper, SimpleTestMixin):
   """Basic test HTTP method GET"""
   
   def get_config(self):
-    return self.get_config_mixin({'method': 'GET'})
+    return self.get_forwards_mix({'method': 'GET'})
   
   def test_forward_http_method_get(self):
     """Check use of HTTP GET method"""
@@ -157,7 +157,7 @@ class SimpleTestRemoveParam(TestHelper, TestMixin):
   """Test of removing request parameter"""
   
   def get_config(self):
-    return self.get_config_mixin({'remove': ['sup1','sup2','sup3']})
+    return self.get_forwards_mix({'remove': ['sup1','sup2','sup3']})
   
   def test_forward_existing_param(self):
     """Check that existing param are forwarded if not in remove list"""
@@ -192,7 +192,7 @@ class SimpleTestOnlyParam(TestHelper, TestMixin):
   """Test of filtering request parameter"""
   
   def get_config(self):
-    return self.get_config_mixin({'only': ['only1','only2','only3']})
+    return self.get_forwards_mix({'only': ['only1','only2','only3']})
   
   def test_suppress_existing_param(self):
     """Check that existing param are suppressed if not in only list"""
@@ -227,7 +227,7 @@ class SimpleTestDefaultParam(TestHelper, TestMixin):
   """Test of setting default value for request parameter"""
   
   def get_config(self):
-    return self.get_config_mixin({'default': {"def1":"val_def1", 
+    return self.get_forwards_mix({'default': {"def1":"val_def1", 
                                               "def2":"val_def2"}})
   
   def test_default_param(self):
@@ -263,7 +263,7 @@ class SimpleTestSetParam(TestHelper, TestMixin):
   """Test of forced value for request parameter"""
   
   def get_config(self):
-    return self.get_config_mixin({'set': {"set1":"val_set1", 
+    return self.get_forwards_mix({'set': {"set1":"val_set1", 
                                           "set2":"val_set2"}})
   
   def test_default_param(self):
@@ -299,7 +299,7 @@ class OrderTestRemoveOnlyParam(TestHelper, TestMixin):
   """Test order of remove / only"""
   
   def get_config(self):
-    return self.get_config_mixin({'remove': ['only_sup1','sup2','sup3'],
+    return self.get_forwards_mix({'remove': ['only_sup1','sup2','sup3'],
                                   'only': ['only_sup1','only2','only3']})
   
   def test_forward_existing_param(self):
@@ -331,7 +331,7 @@ class OrderTestDefaultRemoveOnlyParam(TestHelper, TestMixin):
   """
   
   def get_config(self):
-    return self.get_config_mixin({'default': {"def_remove1":"val_def_remove1", 
+    return self.get_forwards_mix({'default': {"def_remove1":"val_def_remove1", 
                                               "def_only2":"val_def_only2", 
                                               "def_remove_only3":"val_def_remove_only3"}, 
                                   'remove': ['def_remove1','sup2','def_remove_only3'],
@@ -376,7 +376,7 @@ class OrderTestSetRemoveOnlyParam(TestHelper, TestMixin):
   """
   
   def get_config(self):
-    return self.get_config_mixin({'set': {"set_remove1":"val_set_remove1", 
+    return self.get_forwards_mix({'set': {"set_remove1":"val_set_remove1", 
                                           "set_only2":"val_set_only2", 
                                           "set_remove_only3":"val_set_remove_only3"}, 
                                   'remove': ['set_remove1','sup2','set_remove_only3'],
