@@ -294,3 +294,77 @@ class SimpleTestSetParam(TestHelper, TestMixin):
                                "set2":"val_set2"})
 
 
+class OrderTestRemoveOnlyParam(TestHelper, TestMixin):
+  """Test order of remove / only"""
+  
+  def get_config(self):
+    return self.get_config_mixin({'remove': ['only_sup1','sup2','sup3'],
+                                  'only': ['only_sup1','only2','only3']})
+  
+  def test_forward_existing_param(self):
+    """Check that existing param are forwarded if not in remove list
+    and if present in only list
+    """
+    self.assert_transform(req={"only2":"val_only2"}, fwd={"only2":"val_only2"})
+  
+  def test_suppress_existing_param_remove(self):
+    """Check that param are suppressed if in remove list
+    even if present in remove list
+    """
+    self.assert_transform(req={"only_sup1":"val_only_sup1"}, fwd={})
+  
+  def test_suppress_existing_param_only(self):
+    """Check that existing param are suppressed if not in only list
+    even if not in remove list
+    """
+    self.assert_transform(req={"pass1":"val_pass1"}, fwd={})
+  
+
+
+class OrderTestDefaultRemoveOnlyParam(TestHelper, TestMixin):
+  """Test of setting default value for request parameter
+   - not in remove list
+   - present in only list
+   
+   TODO: split test in get and post method
+  """
+  
+  def get_config(self):
+    return self.get_config_mixin({'default': {"def_remove1":"val_def_remove1", 
+                                              "def_only2":"val_def_only2", 
+                                              "def_remove_only3":"val_def_remove_only3"}, 
+                                  'remove': ['def_remove1','sup2','def_remove_only3'],
+                                  'only': ['only1','def_only2','def_remove_only3']})
+  
+  def test_default_param_and_filter(self):
+    """Check that default param are present even if not in request
+    But they are in only list and not in remove list
+    """
+    self.assert_transform(req={}, fwd={"def_only2":"val_def_only2"})
+  
+  def test_forward_existing_param_and_default_and_filter(self):
+    """Check that param are forwarded even if not existing in default
+    If they are in only list and not in remove list
+    """
+    self.assert_transform(req={"only1":"val_only1"},
+                          fwd={"only1":"val_only1", 
+                               "def_only2":"val_def_only2"})
+  
+  def test_request_over_default_and_filter(self):
+    """Check that request param take over default value
+    If they are in only list and not in remove list
+    """
+    self.assert_transform(req={"def_only2":"new_val_only2"}, 
+                          fwd={"def_only2":"new_val_only2"})
+  
+  def test_forward_and_over_default_and_filter(self):
+    """Check that request param take over default value
+    And that param are forwarded even if not existing in default
+    If they are in only list and not in remove list
+    """
+    self.assert_transform(req={"only1":"val_only1", 
+                               "def_only2":"new_val_only2"}, 
+                          fwd={"only1":"val_only1", 
+                               "def_only2":"new_val_only2"})
+  
+
