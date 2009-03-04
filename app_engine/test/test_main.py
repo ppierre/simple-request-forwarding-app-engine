@@ -4,7 +4,7 @@ from utils.webtest import TestApp
 from utils.mocker import *
 
 import main
-from main import WSGIAppHandler
+from main import WSGIAppHandler, WSGIRequestHandler
 
 class DummyYamlOptions(dict):
   def reload(self):
@@ -29,7 +29,8 @@ class TestHelper(unittest.TestCase):
     self.mocker.replay()
   
   def setUp(self):
-    self.app = TestApp(WSGIAppHandler(config=self.get_config(), debug=True))
+    self.app = TestApp(WSGIAppHandler(WSGIRequestHandler(),
+                                      config=self.get_config(), debug=True))
     
     self.mocker = Mocker()
     self.mock_fetch = self.mocker.mock()

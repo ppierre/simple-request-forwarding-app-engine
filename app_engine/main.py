@@ -94,7 +94,6 @@ class WSGIAppHandler(WSGIBaseHandler):
   def do_request(self):
     
     request_url = self.request.path
-    request_method = self.request.method
     
     if request_url not in self.request.config:
       # TODO: error message page not found
@@ -104,8 +103,25 @@ class WSGIAppHandler(WSGIBaseHandler):
     # lookup config for url
     self.request.config_request = self.request.config[request_url]
     
+    #continue next WSGI application
+    return True
+    
+
+# ======================
+# = WSGIRequestHandler =
+# ======================
+
+class WSGIRequestHandler(WSGIBaseHandler):
+  """Process request according of his config
+  """
+  
+  def do_request(self):
+    """Handel request who have a config entry"""
+    
     # take config for request
     config_request = self.request.config_request
+    
+    request_method = self.request.method
     
     #validate request method
     if request_method not in config_request['methods']:
@@ -209,9 +225,11 @@ def setup():
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug(config=config, debug=True)
+    application = WSGIAppHandlerDebug(WSGIRequestHandler(),
+                                      config=config, debug=True)
   else:
-    application = WSGIAppHandler(config=config)
+    application = WSGIAppHandler(WSGIRequestHandler(),
+                                 config=config)
   
   
 
