@@ -366,5 +366,27 @@ class OrderTestDefaultRemoveOnlyParam(TestHelper, TestMixin):
                                "def_only2":"new_val_only2"}, 
                           fwd={"only1":"val_only1", 
                                "def_only2":"new_val_only2"})
+
+
+class OrderTestSetRemoveOnlyParam(TestHelper, TestMixin):
+  """Test of forced value for request parameter
+   
+   TODO: split test in get and post method
+  """
   
+  def get_config(self):
+    return self.get_config_mixin({'set': {"set_remove1":"val_set_remove1", 
+                                          "set_only2":"val_set_only2", 
+                                          "set_remove_only3":"val_set_remove_only3"}, 
+                                  'remove': ['set_remove1','sup2','set_remove_only3'],
+                                  'only': ['only1','set_only2','set_remove_only3']})
+  
+  def test_default_param_and_filter(self):
+    """Check that fixed param are present 
+    Even if in remove list or not in only list 
+    """
+    self.assert_transform(req={}, fwd={"set_remove1":"val_set_remove1", 
+                                       "set_only2":"val_set_only2", 
+                                       "set_remove_only3":"val_set_remove_only3"})
+
 
