@@ -68,7 +68,10 @@ class WSGIAppHandler(object):
       return # exit : no config for this URL
     
     # lookup config for url
-    config_request = self.request.config[request_url]
+    self.request.config_request = self.request.config[request_url]
+    
+    # take config for request
+    config_request = self.request.config_request
     
     #validate request method
     if request_method not in config_request['methods']:
