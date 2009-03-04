@@ -51,8 +51,12 @@ class WSGIBaseHandler(object):
     if self._config:
       self.request.config = self._config
     else:
-      # TODO: error hanling (no request.config)
-      pass
+      # TODO: add __contains__ to webob.Request
+      # if 'config' not in self.request:
+      if not (self.request.environ and
+              'webob.adhoc_attrs' in self.request.environ and
+              'config' in self.request.environ['webob.adhoc_attrs']):
+        raise KeyError, "no 'config' key in Request ad-hoc attributes"
     
     do_next = False
     try:
