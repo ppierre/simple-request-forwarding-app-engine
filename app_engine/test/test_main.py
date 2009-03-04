@@ -70,8 +70,11 @@ class TestMixin:
   
   def assert_a_hooks_get_ok(self, **args):
     response = self.app.get('/request_url', **args)
-    self.assertEqual('200 OK', response.status)
-    self.assertTrue('Send at http://example.com/a_hooks.php' in response)
+    self.assert_a_hooks_ok(response)
+  
+  def assert_transform(self, req={}, fwd={}):
+    self.mock_a_hooks(200, param=fwd)
+    self.assert_a_hooks_get_ok(params=req)
 
 
 class SimpleTestMixin(TestMixin):
@@ -108,8 +111,7 @@ class SimpleTestMixin(TestMixin):
   
   def test_passing_of_get_parameter(self):
     """Check forwarding of get request parameter"""
-    self.mock_a_hooks(200, param=CONTAINS("foo"))
-    self.assert_a_hooks_get_ok(params={"foo":"bar"})
+    self.assert_transform(req={"foo":"bar"}, fwd=CONTAINS("foo"))
   
   def test_value_of_post_parameter(self):
     """Check value of post request parameter"""
@@ -118,8 +120,7 @@ class SimpleTestMixin(TestMixin):
   
   def test_value_of_get_parameter(self):
     """Check value of get request parameter"""
-    self.mock_a_hooks(200, param={"foo":"bar"})
-    self.assert_a_hooks_get_ok(params={"foo":"bar"})
+    self.assert_transform(req={"foo":"bar"}, fwd={"foo":"bar"})
 
 
 class SimpleTestPOST(TestHelper, SimpleTestMixin):
@@ -160,33 +161,31 @@ class SimpleTestRemoveParam(TestHelper, TestMixin):
   
   def test_forward_existing_param(self):
     """Check that existing param are forwarded if not in remove list"""
-    self.mock_a_hooks(200,  param={"pass1":"val_pass1"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1"})
+    self.assert_transform(req={"pass1":"val_pass1"}, fwd={"pass1":"val_pass1"})
   
   def test_suppress_existing_param(self):
     """Check that param are suppressed if in remove list"""
-    self.mock_a_hooks(200,  param={})
-    self.assert_a_hooks_get_ok(params={"sup1":"val_sup1"})
+    self.assert_transform(req={"sup1":"val_sup1"}, fwd={})
   
   def test_suppress_and_forward_existing_param(self):
     """Check that existing param are forwarded if not in remove list
     And Check that param are suppressed if in remove list
     """
-    self.mock_a_hooks(200, param={"pass1":"val_pass1"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "sup1":"val_sup1"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "sup1":"val_sup1"}, 
+                          fwd={"pass1":"val_pass1"})
   
   def test_suppress_and_forward_existing_param_multi(self):
     """Check that existing param are forwarded if not in remove list
     And Check that param are suppressed if in remove list
     With multiple keys
     """
-    self.mock_a_hooks(200, param={"pass1":"val_pass1", 
-                                  "pass2":"val_pass2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "pass2":"val_pass2", 
-                                       "sup1":"val_sup1", 
-                                       "sup3":"val_sup3"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "pass2":"val_pass2", 
+                               "sup1":"val_sup1", 
+                               "sup3":"val_sup3"}, 
+                          fwd={"pass1":"val_pass1", 
+                               "pass2":"val_pass2"})
 
 
 class SimpleTestOnlyParam(TestHelper, TestMixin):
@@ -199,33 +198,31 @@ class SimpleTestOnlyParam(TestHelper, TestMixin):
   
   def test_forward_existing_param(self):
     """Check that existing param are suppressed if not in only list"""
-    self.mock_a_hooks(200, param={})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1"})
+    self.assert_transform(req={"pass1":"val_pass1"}, fwd={})
   
   def test_suppress_existing_param(self):
     """Check that param are forwarded if in only list"""
-    self.mock_a_hooks(200, param={"only1":"val_only1"})
-    self.assert_a_hooks_get_ok(params={"only1":"val_only1"})
+    self.assert_transform(req={"only1":"val_only1"}, fwd={"only1":"val_only1"})
   
   def test_suppress_and_forward_existing_param(self):
     """Check that existing param are suppressed if not in only list
     And Check that param are forwarded if in only list
     """
-    self.mock_a_hooks(200, param={"only1":"val_only1"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "only1":"val_only1"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "only1":"val_only1"}, 
+                          fwd={"only1":"val_only1"})
   
   def test_suppress_and_forward_existing_param_multi(self):
     """Check that existing param are suppressed if not in only list
     And Check that param are forwarded if in only list
     With multiple keys
     """
-    self.mock_a_hooks(200, param={"only1":"val_only1", 
-                                  "only2":"val_only2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "only2":"val_only2", 
-                                       "only1":"val_only1", 
-                                       "pass3":"val_pass3"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "only2":"val_only2", 
+                               "only1":"val_only1", 
+                               "pass3":"val_pass3"}, 
+                          fwd={"only1":"val_only1", 
+                               "only2":"val_only2"})
 
 
 class SimpleTestDefaultParam(TestHelper, TestMixin):
@@ -239,32 +236,31 @@ class SimpleTestDefaultParam(TestHelper, TestMixin):
   
   def test_default_param(self):
     """Check that default param are present even if not in request"""
-    self.mock_a_hooks(200, param={"def1":"val_def1", 
-                                  "def2":"val_def2"})
-    self.assert_a_hooks_get_ok(params={})
+    self.assert_transform(req={}, fwd={"def1":"val_def1", 
+                                       "def2":"val_def2"})
   
   def test_forward_existing_param_and_default(self):
     """Check that param are forwarded even if not existing in default"""
-    self.mock_a_hooks(200, param={"pass1":"val_pass1", 
-                                  "def1":"val_def1", 
-                                  "def2":"val_def2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1"})
+    self.assert_transform(req={"pass1":"val_pass1"},
+                          fwd={"pass1":"val_pass1", 
+                               "def1":"val_def1", 
+                               "def2":"val_def2"})
   
   def test_request_over_default(self):
     """Check that request param take over default value"""
-    self.mock_a_hooks(200, param={"def1":"new_val_def1", 
-                                  "def2":"val_def2"})
-    self.assert_a_hooks_get_ok(params={"def1":"new_val_def1"})
+    self.assert_transform(req={"def1":"new_val_def1"}, 
+                          fwd={"def1":"new_val_def1", 
+                               "def2":"val_def2"})
   
   def test_forward_and_over_default(self):
     """Check that request param take over default value
     And that param are forwarded even if not existing in default
     """
-    self.mock_a_hooks(200, param={"pass1":"val_pass1", 
-                                  "def1":"new_val_def1", 
-                                  "def2":"val_def2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "def1":"new_val_def1"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "def1":"new_val_def1"}, 
+                          fwd={"pass1":"val_pass1", 
+                               "def1":"new_val_def1", 
+                               "def2":"val_def2"})
 
 
 class SimpleTestSetParam(TestHelper, TestMixin):
@@ -278,31 +274,30 @@ class SimpleTestSetParam(TestHelper, TestMixin):
   
   def test_default_param(self):
     """Check that fixed param are present even if not in request"""
-    self.mock_a_hooks(200, param={"set1":"val_set1", 
-                                  "set2":"val_set2"})
-    self.assert_a_hooks_get_ok(params={})
+    self.assert_transform(req={}, fwd={"set1":"val_set1", 
+                                       "set2":"val_set2"})
   
   def test_forward_existing_param_and_default(self):
     """Check that param are forwarded even if not fixed"""
-    self.mock_a_hooks(200, param={"pass1":"val_pass1", 
-                                  "set1":"val_set1", 
-                                  "set2":"val_set2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1"})
+    self.assert_transform(req={"pass1":"val_pass1"}, 
+                          fwd={"pass1":"val_pass1", 
+                               "set1":"val_set1", 
+                               "set2":"val_set2"})
   
   def test_request_over_default(self):
     """Check that request param don't take over fixed value"""
-    self.mock_a_hooks(200, param={"set1":"val_set1", 
-                                  "set2":"val_set2"})
-    self.assert_a_hooks_get_ok(params={"set1":"new_val_set1"})
+    self.assert_transform(req={"set1":"new_val_set1"}, 
+                          fwd={"set1":"val_set1", 
+                               "set2":"val_set2"})
   
   def test_forward_and_over_default(self):
     """Check that request param don't take over fixed value
     And that param are forwarded even if not fixed
     """
-    self.mock_a_hooks(200, param={"pass1":"val_pass1", 
-                                  "set1":"val_set1", 
-                                  "set2":"val_set2"})
-    self.assert_a_hooks_get_ok(params={"pass1":"val_pass1", 
-                                       "set1":"new_val_set1"})
+    self.assert_transform(req={"pass1":"val_pass1", 
+                               "set1":"new_val_set1"}, 
+                          fwd={"pass1":"val_pass1", 
+                               "set1":"val_set1", 
+                               "set2":"val_set2"})
 
 
