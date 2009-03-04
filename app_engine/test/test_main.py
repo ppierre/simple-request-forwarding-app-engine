@@ -4,7 +4,7 @@ from utils.webtest import TestApp
 from utils.mocker import *
 
 import main
-from main import WSGIAppHandler, WSGIValidateMethodHandler, WSGIForwardsHandler
+from main import WSGIAppHandler, list_application
 
 class DummyYamlOptions(dict):
   def reload(self):
@@ -29,8 +29,7 @@ class TestHelper(unittest.TestCase):
     self.mocker.replay()
   
   def setUp(self):
-    self.app = TestApp(WSGIAppHandler(WSGIValidateMethodHandler(
-                                        WSGIForwardsHandler()),
+    self.app = TestApp(WSGIAppHandler(list_application,
                                       config=self.get_config(), debug=True))
     
     self.mocker = Mocker()

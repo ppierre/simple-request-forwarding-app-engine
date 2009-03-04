@@ -233,6 +233,9 @@ class WSGIForwardsHandler(WSGIBaseHandler):
 
 # main WSGI application (WSGIAppHandler)
 global application
+global list_application 
+list_application = WSGIValidateMethodHandler(
+                   WSGIForwardsHandler())
 
 def setup():
   """build and cache in global 'application' main WSGI application"""
@@ -247,15 +250,14 @@ def setup():
   config = YamlOptions(yaml_list, yaml_default, basedir)
   
   global application
+  global list_application
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug(WSGIValidateMethodHandler(
-                                        WSGIForwardsHandler()),
+    application = WSGIAppHandlerDebug(list_application,
                                       config=config, debug=True)
   else:
-    application = WSGIAppHandler(WSGIValidateMethodHandler(
-                                   WSGIForwardsHandler()),
+    application = WSGIAppHandler(list_application,
                                  config=config)
   
   
