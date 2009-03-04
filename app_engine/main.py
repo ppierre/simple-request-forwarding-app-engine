@@ -29,14 +29,16 @@ class WSGIAppHandler(object):
   Take a config object for configuration option
   """
   
-  def __init__(self, config={}, debug=False):
+  def __init__(self, app=None, config={}, debug=False):
     """Initializes with option from yaml files loaded in a YamlOptions object
     
     Args:
+      app: optionally chain an other WSGI application
       config: YamlOptions instance
       debug: if true send stack trace to browser 
              and reload configuration a each request
     """
+    self.app = app
     self.__debug = debug
     self._config = config
     
@@ -58,8 +60,11 @@ class WSGIAppHandler(object):
     except Exception, e:
       self.handle_exception(e, self.__debug)
     
-    return self.response(environ, start_response)
-  
+    if self.app:
+      return self.request.get_response(self.app)(environ, start_response)
+    else:
+      return self.response(environ, start_response)
+   
   def handle_exception(self, exception, debug_mode):
     """Called if this handler throws an exception during execution.
 
