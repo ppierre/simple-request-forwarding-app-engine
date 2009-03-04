@@ -153,8 +153,33 @@ class WSGIValidateMethodHandler(WSGIBaseHandler):
     #continue next WSGI application
     return True
 
+
+# =====================================
+# = WSGIValidateRequestAddressHandler =
+# =====================================
+
+class WSGIValidateRequestAddressHandler(WSGIBaseHandler):
+  """Process request according of his config
+    - check if request address is allowed
+  """
+  
+  def do_request(self):
+    """Handel request who have a config entry"""
     
-    # TODO filter on Request::remote_addr
+    # take config for request
+    config_request = self.request.config_request
+    
+    #validate request method
+    if 'remote_addr' in config_request:
+      logging.info(config_request)
+      if self.request.remote_addr not in config_request['remote_addr']:
+        # TODO: error message 405
+        self.response.status = 405
+        return False # exit : not allowed remote address
+    
+    #continue next WSGI application
+    return True
+
     
     # TODO add HTTP basic authentification for incoming request
     
@@ -235,7 +260,8 @@ class WSGIForwardsHandler(WSGIBaseHandler):
 global application
 global list_application 
 list_application = WSGIValidateMethodHandler(
-                   WSGIForwardsHandler())
+                   WSGIValidateRequestAddressHandler(
+                   WSGIForwardsHandler()))
 
 def setup():
   """build and cache in global 'application' main WSGI application"""

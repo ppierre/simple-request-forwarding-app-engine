@@ -396,3 +396,22 @@ class OrderTestSetRemoveOnlyParam(TestHelper, TestMixin):
                                        "set_remove_only3":"val_set_remove_only3"})
 
 
+class ValidTestRemoteAddress(TestHelper, TestMixin):
+  """Test REMOTE_ADDR validity"""
+  
+  def get_config(self):
+    return self.get_config_mix({'remote_addr': ["127.1.2.3"]})
+  
+  def test_ok_redirect(self):
+    """Check forwarding of request from '127.1.2.3'"""
+    self.mock_a_hooks(200)
+    self.assert_a_hooks_get_ok(extra_environ={"REMOTE_ADDR": "127.1.2.3"})
+  
+  def test_unhallowed_remote_addr(self):
+    """Check unhallowed remote_addr"""
+    self.mock_not_forward()
+    response = self.app.get('/request_url', expect_errors=True,
+                            extra_environ={"REMOTE_ADDR": "127.6.6.6"})
+    self.assertEqual('405 Method Not Allowed', response.status)
+
+
