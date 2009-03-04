@@ -55,12 +55,13 @@ class WSGIAppHandler(object):
       # TODO: error hanling (no request.config)
       pass
     
+    do_next = False
     try:
-      self.do_request()
+      do_next = self.do_request()
     except Exception, e:
       self.handle_exception(e, self.__debug)
     
-    if self.app:
+    if do_next and self.app:
       return self.request.get_response(self.app)(environ, start_response)
     else:
       return self.response(environ, start_response)
@@ -90,7 +91,7 @@ class WSGIAppHandler(object):
     if request_url not in self.request.config:
       # TODO: error message page not found
       self.response.status = 403
-      return # exit : no config for this URL
+      return False # exit : no config for this URL
     
     # lookup config for url
     self.request.config_request = self.request.config[request_url]
@@ -102,7 +103,7 @@ class WSGIAppHandler(object):
     if request_method not in config_request['methods']:
       # TODO: error message 405
       self.response.status = 405
-      return # exit : not allowed request methode
+      return False # exit : not allowed request methode
     
     # TODO filter on Request::remote_addr
     
@@ -158,6 +159,9 @@ class WSGIAppHandler(object):
     
     # Send reponse to original request
     self.response.status = response_code
+    
+    #continue next WSGI application
+    return True
 
 # =======================
 # = WSGIAppHandlerDebug =
