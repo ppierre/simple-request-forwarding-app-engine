@@ -193,11 +193,11 @@ class SimpleTestOnlyParam(TestHelper, TestMixin):
   def get_config(self):
     return self.get_config_mixin({'only': ['only1','only2','only3']})
   
-  def test_forward_existing_param(self):
+  def test_suppress_existing_param(self):
     """Check that existing param are suppressed if not in only list"""
     self.assert_transform(req={"pass1":"val_pass1"}, fwd={})
   
-  def test_suppress_existing_param(self):
+  def test_forward_existing_param(self):
     """Check that param are forwarded if in only list"""
     self.assert_transform(req={"only1":"val_only1"}, fwd={"only1":"val_only1"})
   
@@ -270,20 +270,20 @@ class SimpleTestSetParam(TestHelper, TestMixin):
     self.assert_transform(req={}, fwd={"set1":"val_set1", 
                                        "set2":"val_set2"})
   
-  def test_forward_existing_param_and_default(self):
+  def test_forward_existing_param_and_set(self):
     """Check that param are forwarded even if not fixed"""
     self.assert_transform(req={"pass1":"val_pass1"}, 
                           fwd={"pass1":"val_pass1", 
                                "set1":"val_set1", 
                                "set2":"val_set2"})
   
-  def test_request_over_default(self):
+  def test_set_over_request(self):
     """Check that request param don't take over fixed value"""
     self.assert_transform(req={"set1":"new_val_set1"}, 
                           fwd={"set1":"val_set1", 
                                "set2":"val_set2"})
   
-  def test_forward_and_over_default(self):
+  def test_forward_and_set_over_request(self):
     """Check that request param don't take over fixed value
     And that param are forwarded even if not fixed
     """
