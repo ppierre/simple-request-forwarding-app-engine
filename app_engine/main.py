@@ -107,6 +107,22 @@ class WSGIAppHandler(WSGIBaseHandler):
     return True
     
 
+# =======================
+# = WSGIAppHandlerDebug =
+# =======================
+
+class WSGIAppHandlerDebug(WSGIAppHandler):
+  """Used when running in SDK for reloading config at each request"""
+  
+  def __call__(self, environ, start_response):
+    """Called by WSGI when a request comes in.
+    Will reload config and call parent
+    """
+    if self._config:
+      self._config.reload()
+    return WSGIAppHandler.__call__(self, environ, start_response)
+
+
 # ======================
 # = WSGIRequestHandler =
 # ======================
@@ -186,21 +202,6 @@ class WSGIRequestHandler(WSGIBaseHandler):
     
     #continue next WSGI application
     return True
-
-# =======================
-# = WSGIAppHandlerDebug =
-# =======================
-
-class WSGIAppHandlerDebug(WSGIAppHandler):
-  """Used when running in SDK for reloading config at each request"""
-  
-  def __call__(self, environ, start_response):
-    """Called by WSGI when a request comes in.
-    Will reload config and call parent
-    """
-    if self._config:
-      self._config.reload()
-    return WSGIAppHandler.__call__(self, environ, start_response)
   
 # ======================
 # = Launch application =
