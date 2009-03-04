@@ -86,8 +86,13 @@ class WSGIAppHandler(object):
     # Make all forwarding
     for config in config_request['forwards']:
       
+      # put default value in get parameter
+      for k, v in config['default'].items():
+        if k not in self.request.params:
+          self.request.GET[k] = v
+      
       # get and filter param
-      param = config['default']
+      param = {}
       keys = set(self.request.params.keys()) - set(config['remove'])
       if 'only' in config:
         keys = keys & set(config['only'])
