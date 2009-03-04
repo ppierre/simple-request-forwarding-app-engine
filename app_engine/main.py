@@ -55,6 +55,22 @@ class WSGIAppHandler(object):
       self.handle_exception(e, self.__debug)
     
     return self.response(environ, start_response)
+  
+  def handle_exception(self, exception, debug_mode):
+    """Called if this handler throws an exception during execution.
+
+    The default behavior is to call self.error(500) and print a stack trace
+    if debug_mode is True.
+
+    Args:
+      exception: the exception that was thrown
+      debug_mode: True if the web application is running in debug mode
+    """
+    self.response.status = 500
+    logging.exception(exception)
+    if debug_mode:
+      lines = ''.join(traceback.format_exception(*sys.exc_info()))
+      self.response.body = '<pre>%s</pre>' % (cgi.escape(lines, quote=True))
     
   # Handel all request methods
   def do_request(self):
@@ -133,22 +149,6 @@ class WSGIAppHandler(object):
     
     # Send reponse to original request
     self.response.status = response_code
-  
-  def handle_exception(self, exception, debug_mode):
-    """Called if this handler throws an exception during execution.
-
-    The default behavior is to call self.error(500) and print a stack trace
-    if debug_mode is True.
-
-    Args:
-      exception: the exception that was thrown
-      debug_mode: True if the web application is running in debug mode
-    """
-    self.response.status = 500
-    logging.exception(exception)
-    if debug_mode:
-      lines = ''.join(traceback.format_exception(*sys.exc_info()))
-      self.response.body = '<pre>%s</pre>' % (cgi.escape(lines, quote=True))
 
 # =======================
 # = WSGIAppHandlerDebug =
