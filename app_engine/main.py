@@ -91,7 +91,6 @@ class WSGIAppHandler(object):
       keys = set(self.request.params.keys()) - set(config['remove'])
       if 'only' in config:
         keys = keys & set(config['only'])
-      logging.info("keys : %s" % keys)
       for key in keys:
         # TODO Request::get(key) / Request::get_all(key) ?
         param[key] = self.request.params.get(key)
