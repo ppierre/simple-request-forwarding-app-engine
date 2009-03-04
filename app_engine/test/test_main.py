@@ -42,8 +42,7 @@ class TestHelper(unittest.TestCase):
     main.urlforward = self.old_fetch
 
 
-class SimpleTestMixin:
-  """Basic test Mixin to use with POST or GET"""
+class TestMixin:
 
   config_mixin = DummyYamlOptions({
       "/request_url": {
@@ -70,7 +69,11 @@ class SimpleTestMixin:
   def assert_a_hooks_ok(self, response):
     self.assertEqual('200 OK', response.status)
     self.assertTrue('Send at http://example.com/a_hooks.php' in response)
-  
+
+
+class SimpleTestMixin(TestMixin):
+  """Basic test Mixin to use with POST or GET"""
+
   def test_ok_redirect(self):
     """Check forwarding of request"""
     self.mock_a_hooks(200)
@@ -120,7 +123,7 @@ class SimpleTestPOST(TestHelper, SimpleTestMixin):
   """Basic test HTTP method POST"""
   
   def get_config(self):
-    config = SimpleTestMixin.config_mixin.copy()
+    config = TestMixin.config_mixin.copy()
     config["/request_url"]["forwards"][0]['method'] = 'POST'
     return config
   
@@ -134,7 +137,7 @@ class SimpleTestGET(TestHelper, SimpleTestMixin):
   """Basic test HTTP method GET"""
   
   def get_config(self):
-    config = SimpleTestMixin.config_mixin.copy()
+    config = TestMixin.config_mixin.copy()
     config["/request_url"]["forwards"][0]['method'] = 'GET'
     return config
   
