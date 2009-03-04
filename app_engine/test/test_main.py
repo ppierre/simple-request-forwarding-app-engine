@@ -77,6 +77,11 @@ class TestMixin:
     self.mock_a_hooks(200, param=fwd)
     self.assert_a_hooks_get_ok(params=req)
   
+  def get_config_mix(self, mixin):
+    config = TestMixin.config_mixin.copy()
+    config["/request_url"].update(mixin)
+    return config
+  
   def get_forwards_mix(self, mixin):
     config = TestMixin.config_mixin.copy()
     config["/request_url"]["forwards"][0].update(mixin)
