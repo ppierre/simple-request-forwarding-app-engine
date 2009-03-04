@@ -75,6 +75,11 @@ class TestMixin:
   def assert_transform(self, req={}, fwd={}):
     self.mock_a_hooks(200, param=fwd)
     self.assert_a_hooks_get_ok(params=req)
+  
+  def get_config_mixin(self, mixin):
+    config = TestMixin.config_mixin.copy()
+    config["/request_url"]["forwards"][0].update(mixin)
+    return config
 
 
 class SimpleTestMixin(TestMixin):
@@ -127,9 +132,7 @@ class SimpleTestPOST(TestHelper, SimpleTestMixin):
   """Basic test HTTP method POST"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['method'] = 'POST'
-    return config
+    return self.get_config_mixin({'method': 'POST'})
   
   def test_forward_http_method_post(self):
     """Check use of HTTP POST method"""
@@ -141,9 +144,7 @@ class SimpleTestGET(TestHelper, SimpleTestMixin):
   """Basic test HTTP method GET"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['method'] = 'GET'
-    return config
+    return self.get_config_mixin({'method': 'GET'})
   
   def test_forward_http_method_get(self):
     """Check use of HTTP GET method"""
@@ -155,9 +156,7 @@ class SimpleTestRemoveParam(TestHelper, TestMixin):
   """Test of removing request parameter"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['remove'] = ['sup1','sup2','sup3']
-    return config
+    return self.get_config_mixin({'remove': ['sup1','sup2','sup3']})
   
   def test_forward_existing_param(self):
     """Check that existing param are forwarded if not in remove list"""
@@ -192,9 +191,7 @@ class SimpleTestOnlyParam(TestHelper, TestMixin):
   """Test of filtering request parameter"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['only'] = ['only1','only2','only3']
-    return config
+    return self.get_config_mixin({'only': ['only1','only2','only3']})
   
   def test_forward_existing_param(self):
     """Check that existing param are suppressed if not in only list"""
@@ -229,10 +226,8 @@ class SimpleTestDefaultParam(TestHelper, TestMixin):
   """Test of setting default value for request parameter"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['default'] = {"def1":"val_def1", 
-                                                        "def2":"val_def2"}
-    return config
+    return self.get_config_mixin({'default': {"def1":"val_def1", 
+                                              "def2":"val_def2"}})
   
   def test_default_param(self):
     """Check that default param are present even if not in request"""
@@ -267,10 +262,8 @@ class SimpleTestSetParam(TestHelper, TestMixin):
   """Test of forced value for request parameter"""
   
   def get_config(self):
-    config = TestMixin.config_mixin.copy()
-    config["/request_url"]["forwards"][0]['set'] = {"set1":"val_set1", 
-                                                    "set2":"val_set2"}
-    return config
+    return self.get_config_mixin({'set': {"set1":"val_set1", 
+                                          "set2":"val_set2"}})
   
   def test_default_param(self):
     """Check that fixed param are present even if not in request"""
