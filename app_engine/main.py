@@ -127,12 +127,13 @@ class WSGIAppHandlerDebug(WSGIAppHandler):
     return WSGIAppHandler.__call__(self, environ, start_response)
 
 
-# ======================
-# = WSGIRequestHandler =
-# ======================
+# =============================
+# = WSGIValidateMethodHandler =
+# =============================
 
-class WSGIRequestHandler(WSGIBaseHandler):
+class WSGIValidateMethodHandler(WSGIBaseHandler):
   """Process request according of his config
+    - check if HTTP method is allowed
   """
   
   def do_request(self):
@@ -149,9 +150,28 @@ class WSGIRequestHandler(WSGIBaseHandler):
       self.response.status = 405
       return False # exit : not allowed request methode
     
+    #continue next WSGI application
+    return True
+
+    
     # TODO filter on Request::remote_addr
     
     # TODO add HTTP basic authentification for incoming request
+    
+
+# =======================
+# = WSGIForwardsHandler =
+# =======================
+
+class WSGIForwardsHandler(WSGIBaseHandler):
+  """Process all forward defined in config
+  """
+  
+  def do_request(self):
+    """Handel request who have a config entry"""
+    
+    # take config for request
+    config_request = self.request.config_request
     
     # variable to collect response
     response_code = 200
@@ -230,10 +250,12 @@ def setup():
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug(WSGIRequestHandler(),
+    application = WSGIAppHandlerDebug(WSGIValidateMethodHandler(
+                                        WSGIForwardsHandler()),
                                       config=config, debug=True)
   else:
-    application = WSGIAppHandler(WSGIRequestHandler(),
+    application = WSGIAppHandler(WSGIValidateMethodHandler(
+                                   WSGIForwardsHandler()),
                                  config=config)
   
   
