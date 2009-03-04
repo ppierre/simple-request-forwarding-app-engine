@@ -18,12 +18,11 @@ from utils.yamloptions import YamlOptions
 from utils.urlforward import urlforward
 from utils import server
 
+# ===================
+# = WSGIBaseHandler =
+# ===================
 
-# ==================
-# = WSGIAppHandler =
-# ==================
-
-class WSGIAppHandler(object):
+class WSGIBaseHandler(object):
   """Run directly as a WSGI-compatible application.
   
   Take a config object for configuration option
@@ -82,6 +81,15 @@ class WSGIAppHandler(object):
       lines = ''.join(traceback.format_exception(*sys.exc_info()))
       self.response.body = '<pre>%s</pre>' % (cgi.escape(lines, quote=True))
     
+
+# ==================
+# = WSGIAppHandler =
+# ==================
+
+class WSGIAppHandler(WSGIBaseHandler):
+  """Check config for request URL and fix option for it
+  """
+  
   # Handel all request methods
   def do_request(self):
     
