@@ -2,7 +2,6 @@
 
 import logging
 import urllib
-import base64
 import wsgiref.handlers
 import os
 import sys
