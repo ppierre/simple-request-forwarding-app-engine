@@ -260,7 +260,8 @@ class WSGIForwardsHandler(WSGIBaseHandler):
 # ======================
 
 # main WSGI application (WSGIAppHandler)
-global application
+global main_application
+main_application = None
 global list_application 
 list_application = WSGIValidateMethodHandler(
                    WSGIValidateRequestAddressHandler(
@@ -278,15 +279,15 @@ def setup():
   basedir = os.path.dirname(__file__)
   config = YamlOptions(yaml_list, yaml_default, basedir)
   
-  global application
+  global main_application
   global list_application
   
   # Test if in SDK (local)
   if server.platform() == 'local':
-    application = WSGIAppHandlerDebug(list_application,
+    main_application = WSGIAppHandlerDebug(list_application,
                                       config=config, debug=True)
   else:
-    application = WSGIAppHandler(list_application,
+    main_application = WSGIAppHandler(list_application,
                                  config=config)
   
   
@@ -294,8 +295,8 @@ def setup():
 def main():
   """launch main WSGI application"""
   
-  global application
-  run_wsgi_app(application)
+  global main_application
+  run_wsgi_app(main_application)
 
 
 if __name__ == '__main__':
