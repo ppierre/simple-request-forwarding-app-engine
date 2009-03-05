@@ -208,19 +208,18 @@ class WSGIForwardsHandler(WSGIBaseHandler):
     # Make all forwarding
     for config in config_request['forwards']:
       
-      # put default value in get parameter
-      for k, v in config['default'].items():
-        if k not in self.request.params:
-          self.request.GET[k] = v
+      # use a dict to hold forwarded parameter
+      request_param = config['default'].copy()
+      request_param.update(self.request.params)
       
       # get and filter param
       param = {}
-      keys = set(self.request.params.keys()) - set(config['remove'])
+      keys = set(request_param.keys()) - set(config['remove'])
       if 'only' in config:
         keys = keys & set(config['only'])
       for key in keys:
         # TODO Request::get(key) / Request::get_all(key) ?
-        param[key] = self.request.params.get(key)
+        param[key] = request_param.get(key)
       param.update(config['set'])
       
       # build forwarded request
