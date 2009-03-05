@@ -46,6 +46,8 @@ class YamlOptions(UserDict.IterableUserDict):
   """
   
   def __init__(self, yaml_list, yaml_default, base_dir):
+    # TODO: check no use of calling UserDict.IterableUserDict.__init__
+    (UserDict.IterableUserDict).__init__(self)
     self._yaml_list = yaml_list
     self._yaml_default = yaml_default
     self._base_dir = base_dir
