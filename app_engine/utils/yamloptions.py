@@ -40,9 +40,9 @@ def get_config_from(config_file, base_dir):
 # = YamlOptions =
 # ===============
 
-class YamlOptions(UserDict.DictMixin):
+class YamlOptions(UserDict.IterableUserDict):
   """
-  
+  TODO: add test with read YamlOptions
   """
   
   def __init__(self, yaml_list, yaml_default, base_dir):
@@ -53,8 +53,6 @@ class YamlOptions(UserDict.DictMixin):
     # do initial loading
     self.reload()
   
-  def __getitem__(self, key):
-    return self._options[key]
   
   def reload(self):
     options = {}
@@ -69,7 +67,7 @@ class YamlOptions(UserDict.DictMixin):
                                     for config_forward in config_request['forwards']]
       options[url_request] = Chainmap(config_request,config_default)
     
-    self._options = options
+    self.data = options
 
 
 class YamlOptionsTests(unittest.TestCase):
