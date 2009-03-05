@@ -68,6 +68,10 @@ class WSGIBaseHandler(object):
     else:
       return self.response(environ, start_response)
    
+  def do_request(self):
+    raise NotImplementedError("Can't use WSGIBaseHandler directly")
+    return False
+  
   def handle_exception(self, exception, debug_mode):
     """Called if this handler throws an exception during execution.
 
