@@ -9,7 +9,6 @@ Copyright (c) 2009 __pierreTM__. All rights reserved.
 
 import os
 import UserDict
-import unittest
 import yaml
 
 from Chainmap import Chainmap
@@ -71,11 +70,3 @@ class YamlOptions(UserDict.IterableUserDict):
     
     self.data = options
 
-
-class YamlOptionsTests(unittest.TestCase):
-  def setUp(self):
-    pass
-
-
-if __name__ == '__main__':
-  unittest.main()
