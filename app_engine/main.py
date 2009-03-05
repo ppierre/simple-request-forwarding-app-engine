@@ -16,6 +16,7 @@ from utils.Chainmap import Chainmap
 from utils.yamloptions import YamlOptions
 from utils.urlforward import urlforward
 from utils import server
+from utils import functional
 
 # ===================
 # = WSGIBaseHandler =
@@ -262,10 +263,16 @@ class WSGIForwardsHandler(WSGIBaseHandler):
 # main WSGI application (WSGIAppHandler)
 global main_application
 main_application = None
+
+# List of chained WSGI application
 global list_application 
-list_application = WSGIValidateMethodHandler(
-                   WSGIValidateRequestAddressHandler(
-                   WSGIForwardsHandler()))
+list_application = functional.foldr(lambda u,v: u(v), None,
+                      [
+                        WSGIValidateMethodHandler,
+                        WSGIValidateRequestAddressHandler,
+                        WSGIForwardsHandler,
+                      ]
+                   )
 
 def setup():
   """build and cache in global 'application' main WSGI application"""
