@@ -7,7 +7,6 @@ From : http://code.activestate.com/recipes/305268/
 """
 
 import UserDict
-import unittest
 
 
 class Chainmap(UserDict.DictMixin):
