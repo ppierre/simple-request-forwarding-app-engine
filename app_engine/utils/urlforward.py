@@ -8,6 +8,9 @@ Copyright (c) 2009 __pierreTM__. All rights reserved.
 """
 
 import urllib
+import base64
+
+# TDOD: add test using urlforward
 
 from google.appengine.api import urlfetch
 
