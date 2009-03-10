@@ -12,22 +12,22 @@ import os
 # ==============================================
 
 def platform():
-  """Return where program is executed :
-   - App engine SDK         : 'local'
-   - App deployed on Google : 'google'
-   - Other                  : 'unknown'
-  """
-  if os.environ.get('SERVER_SOFTWARE','').startswith('Devel'):
-      return 'local'
-  elif os.environ.get('SERVER_SOFTWARE','').startswith('Goog'):
-      return 'google'
-  else:
-      return 'unknown'
+    """Return where program is executed :
+     - App engine SDK                   : 'local'
+     - App deployed on Google : 'google'
+     - Other                                    : 'unknown'
+    """
+    if os.environ.get('SERVER_SOFTWARE', '').startswith('Devel'):
+            return 'local'
+    elif os.environ.get('SERVER_SOFTWARE', '').startswith('Goog'):
+            return 'google'
+    else:
+            return 'unknown'
+
 
 def main():
-  print("Launched on %s" % platform())
+    print("Launched on %s" % platform())
 
 
 if __name__ == '__main__':
-  main()
-
+    main()
